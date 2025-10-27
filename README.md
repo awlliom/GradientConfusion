@@ -1,4 +1,4 @@
-# Random-Logit-Scaling
+# GradientConfusion
 
 This is the source code containing the attacks and defenses we used in our experiments. For the attack implementations, we used [BlackboxBench](https://github.com/SCLBD/BlackboxBench) and modified its source code to meet our needs. We implemented our defense, along with the state-of-the-art randomized defenses used for comparison, since BlackboxBench only contains code for attacks and not defenses.
 
@@ -267,3 +267,4 @@ We develop an adaptive attack against AAA-sine to show its vulnerability. To run
 }
 ```
 setting the `method` to `none` disables the adaptive attack. `k` in `switch_dir` specifies the number of unsuccessful attack iterations before the attacker switches direction as explained in Section 4 of the paper.
+
