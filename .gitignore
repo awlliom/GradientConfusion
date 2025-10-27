@@ -34,3 +34,4 @@ runs/
 outputs/
 checkpoints/
 data/
+cifar10_data/
