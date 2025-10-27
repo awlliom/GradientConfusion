@@ -1,0 +1,35 @@
+{
+    "_comment1": "irnd, rfd, ornd, rls, aaa, none",
+    "defense": "none",
+    "irnd": {
+        "sigma_noise": 0.01
+    },
+    "rfd": {
+        "sigma_noise": 0.7,
+        "target_layers": [-1]
+    },
+    "ornd": {
+        "sigma_noise": 1
+    },
+    "rls":{
+        "distribution": "uniform",
+        "uniform": {
+            "low": 0.5,
+            "high": 10
+        },
+        "gaussian": {
+            "low": 0.2,
+            "mean": 1,
+            "std": 100
+        }
+    },
+    "aaa":{
+        "attractor_interval": 4,
+        "calibration_loss_weight": 5,
+        "dev": 0.5,
+        "temperature": 1,
+        "optimizer_lr": 0.1,
+        "num_iter": 100
+    },
+    "none": ""
+}

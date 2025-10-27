@@ -1,0 +1,36 @@
+# Virtual environment
+venv/
+.env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE/project files
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Model checkpoints or large data
+*.pt
+*.pth
+*.tar
+*.h5
+*.gz
+*.zip
+*.tar.gz
+*.JPEG
+runs/
+outputs/
+checkpoints/
+data/
