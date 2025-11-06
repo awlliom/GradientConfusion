@@ -12,7 +12,7 @@ import sys
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
 
-DIR = 'GradConf'
+DIR = 'GradientConfusion'
 
 def get_dataset_shape(dset_name):
     if dset_name == 'mnist':

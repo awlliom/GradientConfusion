@@ -10,6 +10,8 @@ from attacks.score.sign_attack import SignAttack
 from attacks.score.zo_sign_sgd_attack import ZOSignSGDAttack
 from attacks.score.bandit_attack import BanditAttack
 from attacks.score.nes_attack import NESAttack
+from attacks.score.gsba_attack import GSBAAttack
+from attacks.score.brusli_attack import BruSLiAttack
 from utils.model_loader import load_torch_models, load_torch_models_imagesub
 from utils.misc import config_path_join, src_path_join, create_dir, get_dataset_shape
 from utils.compute import tf_nsign, sign
@@ -192,6 +194,54 @@ if __name__ == '__main__':
                                          "SignFlipAttack", "RaySAttack", "BoundaryAttack"]:
                 logs_dict = attacker.run(
                     x_batch, y_batch, model, target, dset)
+
+            elif config['attack_name'] in ["GSBAAttack", "BruSLiAttack"]:
+                # GSBA and BruSLi need direct model access
+                attacker.set_model(model)
+                
+                def loss_fct(xs, es=False):
+                    if type(xs) is torch.Tensor:
+                        x_eval = xs.permute(0, 3, 1, 2)
+                    else:
+                        x_eval = torch.FloatTensor(
+                            xs.transpose(0, 3, 1, 2))
+                    x_eval = torch.clamp(
+                        x_eval - x_ori, -epsilon, epsilon) + x_ori
+                    x_eval = torch.clamp(x_eval, 0, 1)
+
+                    y_logit = model(x_eval.cuda())
+                    loss = criterion(y_logit, y_batch, target)
+                    if es:
+                        y_logit = y_logit.detach()
+                        correct = torch.argmax(y_logit, dim=1) == y_batch
+                        if target:
+                            return correct, loss.detach()
+                        else:
+                            return ~correct, loss.detach()
+                    else:
+                        return loss.detach()
+
+                def early_stop_crit_fct(xs):
+                    if type(xs) is torch.Tensor:
+                        x_eval = xs.permute(0, 3, 1, 2)
+                    else:
+                        x_eval = torch.FloatTensor(
+                            xs.transpose(0, 3, 1, 2)).cuda()
+                    x_eval = torch.clamp(
+                        x_eval - x_ori, -epsilon, epsilon) + x_ori
+                    x_eval = torch.clamp(x_eval, 0, 1)
+                    
+                    y_logit = model(x_eval)
+                    y_logit = y_logit.detach()
+
+                    correct = torch.argmax(y_logit, dim=1) == y_batch
+                    if target:
+                        return correct
+                    else:
+                        return ~correct
+
+                logs_dict = attacker.run(
+                    x_batch, loss_fct, early_stop_crit_fct)
 
             else:
                 def loss_fct(xs, es=False):

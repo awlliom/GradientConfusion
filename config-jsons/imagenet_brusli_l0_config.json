@@ -1,0 +1,32 @@
+{
+  "_comment1": "===== DATASET CONFIGURATION =====",
+  "dset_name": "imagenet_sub",
+  "dset_config": {},
+  "_comment2": "===== EVAL CONFIGURATION =====",
+  "num_eval_examples": 1000,
+  "_comment3": "=====ADVERSARIAL EXAMPLES CONFIGURATION=====",
+  "attack_name": "BruSLiAttack",
+  "attack_config": {
+    "batch_size": 1000,
+    "name": "BruSLi",
+    "epsilon": 255,
+    "p": "inf",
+    "n_pix": 4,
+    "pop_size": 10,
+    "lamda": 0.01,
+    "m1": 0.24,
+    "m2": 0.997,
+    "seed": null,
+    "flag": false,
+    "ftype": "ce",
+    "init_mode": "uni",
+    "init_scale": 1,
+    "max_loss_queries": 10000,
+    "dataset": "imagenet"
+  },
+  "device": "/gpu:1",
+  "modeln": "Resnet50",
+  "target": false,
+  "target_type": "median",
+  "seed": 0
+}

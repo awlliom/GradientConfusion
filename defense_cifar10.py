@@ -75,6 +75,7 @@ if __name__ == '__main__':
 
     # create/ allocate the result json for tabulation
     data_dir = src_path_join('.')
+    print(data_dir)
     create_dir(data_dir)
     res = {}
     # cfs = [config]

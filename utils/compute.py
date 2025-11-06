@@ -226,7 +226,7 @@ def noisy_sign(t, retain_p=1, crit='top', is_ns_sign=True):
     only `retain_p` * 100 % of the coordinates retain their sign according
     to a `crit`.
     The noise is of the following effect
-        sign(t) * x where x \in {+1, -1}
+        sign(t) * x where x in {+1, -1}
     Thus, if sign(t) = 0, sign(t) * x is always 0 (in case of `is_ns_sign=False`)
     :param t: tensor of `batch_size x dim`
     :param retain_p: fraction of coordinates

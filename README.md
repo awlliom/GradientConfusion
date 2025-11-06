@@ -6,6 +6,15 @@ This is the source code containing the attacks and defenses we used in our exper
 
 We have augmented BlackboxBench with the source code of WideResNet-28, VGG-16, and ResNet-18, which we used for training our CIFAR-10 classifiers in the `./models/` directory. We have added code to implement iRND, oRND, AAA, RFD, oRND, and RLS defenses for each model. 
 
+## Running out defense
+Use the following command to run out defense
+```
+python defense_cifar10.py ./config-jsons/cifar10_square_linf_config.json
+```
+And for imagenet
+```
+python defense_imagenet.py ./config-jsons/imagenet_square_linf_config.json
+```
 ### First Step: Configuring the Defenses
 
 `.\config-jsons\defense_config.json` contains the configuration for the defenses and is used to specify the defense to be used by the victim model. To activate a defense you have to modify the `defense` attribute in the JSON file (lines 2 and 3):
@@ -267,4 +276,3 @@ We develop an adaptive attack against AAA-sine to show its vulnerability. To run
 }
 ```
 setting the `method` to `none` disables the adaptive attack. `k` in `switch_dir` specifies the number of unsuccessful attack iterations before the attacker switches direction as explained in Section 4 of the paper.
-
