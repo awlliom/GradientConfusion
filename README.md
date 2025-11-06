@@ -7,7 +7,7 @@ This is the source code containing the attacks and defenses we used in our exper
 We have augmented BlackboxBench with the source code of WideResNet-28, VGG-16, and ResNet-18, which we used for training our CIFAR-10 classifiers in the `./models/` directory. We have added code to implement iRND, oRND, AAA, RFD, oRND, and RLS defenses for each model. 
 
 ## Running our defense
-Use the following command to run out defense
+Use the following command to run our defense
 ```
 python defense_cifar10.py ./config-jsons/cifar10_square_linf_config.json
 ```
