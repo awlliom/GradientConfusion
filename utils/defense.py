@@ -9,17 +9,18 @@ import multiprocessing as mp
 
 def compute_batch_jv_chunked(model, batch_images, chunk_size=10):
     """
-    Computes JVP for large batches by splitting into smaller chunks.
+    Computes AA^T v for large batches by splitting into smaller chunks.
+    Where A is the Jacobian of logits w.r.t. inputs.
     """
     B = batch_images.shape[0]
-    all_Jv = []
+    all_AATv = []
     all_probs = []
 
     for start in range(0, B, chunk_size):
         end = min(start + chunk_size, B)
         images_chunk = batch_images[start:end].clone().detach().requires_grad_(True)
 
-        logits = model(images_chunk) 
+        logits = model(images_chunk)
         probs = F.softmax(logits, dim=1)
 
         _, sorted_indices = torch.sort(probs, dim=1, descending=True)
@@ -27,24 +28,40 @@ def compute_batch_jv_chunked(model, batch_images, chunk_size=10):
         j = sorted_indices[:, 1]
 
         batch_indices = torch.arange(end - start, device=batch_images.device)
-        logits_i = logits[batch_indices, i]
-        logits_j = logits[batch_indices, j]
+        probs_i = probs[batch_indices, i]
+        probs_j = probs[batch_indices, j]
 
-        s = logits_i - logits_j
+        s = probs_i - probs_j
 
-        v = torch.autograd.grad(torch.sum(s), images_chunk, retain_graph=True)[0]
-
-        _, Jv_chunk = torch.autograd.functional.jvp(
-            lambda x: model(x), images_chunk, v
+        # v: gradient w.r.t. logits, shape (chunk, num_classes)
+        v = torch.autograd.grad(torch.sum(s), logits, retain_graph=True)[0]
+        # print('v shape:', v.shape)
+        
+        # Step 1: Compute A^T v (VJP) - gradient w.r.t. images
+        # Shape: (chunk, C, H, W)
+        ATv = torch.autograd.grad(
+            outputs=logits,
+            inputs=images_chunk,
+            grad_outputs=v,
+            retain_graph=True
+        )[0]
+        # print('A^T v shape:', ATv.shape)
+        
+        # Step 2: Compute A(A^T v) (JVP) - back to logit space
+        # Shape: (chunk, num_classes)
+        _, AATv_chunk = torch.autograd.functional.jvp(
+            lambda x: model(x), images_chunk, ATv
         )
-
-        all_Jv.append(-Jv_chunk.detach())
+        
+        
+        all_AATv.append(-AATv_chunk.detach())
         all_probs.append(probs.detach())
 
-        del logits, probs, i, j, logits_i, logits_j, s, v, Jv_chunk
+        del logits, probs, i, j, probs_i, probs_j, s, v, ATv, AATv_chunk
         torch.cuda.empty_cache()
-
-    return torch.cat(all_Jv, dim=0), torch.cat(all_probs, dim=0)
+    AATC = torch.cat(all_AATv, dim=0)
+    # print('AA^T v shape:', AATC.shape)
+    return AATC, torch.cat(all_probs, dim=0)
 
 def softmax_gradient_torch_vectorized(y, i, j):
     """
