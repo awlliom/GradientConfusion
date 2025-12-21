@@ -1,6 +1,6 @@
 {
   "_comment1": "===== DATASET CONFIGURATION =====",
-  "dset_name": "imagenet_sub",
+  "dset_name": "cifar10",
   "dset_config": {},
   "_comment2": "===== EVAL CONFIGURATION =====",
   "num_eval_examples": 1000,
