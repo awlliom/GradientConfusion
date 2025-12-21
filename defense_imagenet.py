@@ -10,6 +10,7 @@ from attacks.score.sign_attack import SignAttack
 from attacks.score.zo_sign_sgd_attack import ZOSignSGDAttack
 from attacks.score.bandit_attack import BanditAttack
 from attacks.score.nes_attack import NESAttack
+from attacks.score.brusli_attack import BruSLeAttack
 from utils.model_loader import load_torch_models, load_torch_models_imagesub
 from utils.misc import config_path_join, src_path_join, create_dir, get_dataset_shape
 from utils.compute import tf_nsign, sign

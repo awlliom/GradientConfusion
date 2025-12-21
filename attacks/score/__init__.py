@@ -1,3 +1,3 @@
-from .brusli_attack import BruSLiAttack
+from .brusli_attack import BruSLeAttack
 
-__all__ = ['BruSLiAttack']
+__all__ = ['BruSLeAttack']

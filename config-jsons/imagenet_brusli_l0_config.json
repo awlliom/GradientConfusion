@@ -5,10 +5,10 @@
   "_comment2": "===== EVAL CONFIGURATION =====",
   "num_eval_examples": 1000,
   "_comment3": "=====ADVERSARIAL EXAMPLES CONFIGURATION=====",
-  "attack_name": "BruSLiAttack",
+  "attack_name": "BruSLeAttack",
   "attack_config": {
-    "batch_size": 1000,
-    "name": "BruSLi",
+    "batch_size": 100,
+    "name": "BruSLe",
     "epsilon": 255,
     "p": "inf",
     "n_pix": 4,
@@ -18,11 +18,10 @@
     "m2": 0.997,
     "seed": null,
     "flag": false,
-    "ftype": "ce",
+    "ftype": "margin",
     "init_mode": "uni",
     "init_scale": 1,
-    "max_loss_queries": 10000,
-    "dataset": "imagenet"
+    "max_loss_queries": 1000
   },
   "device": "/gpu:1",
   "modeln": "Resnet50",
