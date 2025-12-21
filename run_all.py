@@ -1,5 +1,6 @@
 import argparse
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
@@ -47,13 +48,20 @@ def main() -> int:
     )
     parser.add_argument(
         "--defenses",
+        "--defense",
+        dest="defenses",
         default="auto",
-        help="Comma-separated defense list or 'auto' (default: auto).",
+        help="Comma-separated defense list (including 'none') or 'auto' (default: auto).",
     )
     parser.add_argument(
         "--models",
         default="auto",
         help="Comma-separated model list or 'auto' (default: auto).",
+    )
+    parser.add_argument(
+        "--attacks",
+        default="all",
+        help="Comma-separated attack_name list or 'all' (default: all).",
     )
     parser.add_argument(
         "--continue-on-error",
@@ -109,8 +117,24 @@ def main() -> int:
     if args.datasets in ("all", "imagenet"):
         runs.append(("imagenet", repo_root / "attack_imagenet.py"))
 
+    if args.attacks == "all":
+        attack_patterns = None
+    else:
+        raw_patterns = [a.strip() for a in args.attacks.split(",") if a.strip()]
+        if not raw_patterns:
+            print("No attacks specified.", file=sys.stderr)
+            return 1
+        attack_patterns = []
+        for pattern in raw_patterns:
+            try:
+                attack_patterns.append(re.compile(pattern, re.IGNORECASE))
+            except re.error as exc:
+                print(f"Invalid attack regex '{pattern}': {exc}", file=sys.stderr)
+                return 1
+
     try:
         any_configs = False
+        ran_any = False
         for defense in defenses:
             if defense not in defense_config:
                 print(
@@ -175,6 +199,20 @@ def main() -> int:
                             return 1
                         continue
 
+                    if "attack_name" not in config:
+                        print(
+                            f"Missing attack_name in {config_path}",
+                            file=sys.stderr,
+                        )
+                        if not args.continue_on_error:
+                            return 1
+                        continue
+
+                    attack_name = config["attack_name"]
+                    if attack_patterns is not None:
+                        if not any(p.search(attack_name) for p in attack_patterns):
+                            continue
+
                     if "modeln" not in config:
                         print(
                             f"Missing modeln in {config_path}",
@@ -192,6 +230,7 @@ def main() -> int:
                                 f"Running: {attack_script.name} {config_path} "
                                 f"(model={model})"
                             )
+                            ran_any = True
                             try:
                                 subprocess.run(
                                     [sys.executable, str(attack_script), str(config_path)],
@@ -235,6 +274,9 @@ def main() -> int:
                         config_path.write_text(config_text)
 
         if not any_configs:
+            return 1
+        if not ran_any:
+            print("No runs executed. Check your --attacks filter.", file=sys.stderr)
             return 1
     finally:
         defense_config_path.write_text(original_defense_text)
