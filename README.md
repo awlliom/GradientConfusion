@@ -250,6 +250,10 @@ Each config file has a `modeln` attribute that has to be set to:
 ```
 modeln: Resnet50
 ```
+or
+```
+modeln: ViT
+```
 
 
 ### Third Step: Runing the attack

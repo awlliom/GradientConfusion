@@ -22,7 +22,7 @@ def available_models(prefix: str) -> list[str]:
     if prefix == "cifar10":
         return ["resnet", "wrn", "vgg"]
     if prefix == "imagenet":
-        return ["Resnet50"]
+        return ["Resnet50", "ViT"]
     return []
 
 
