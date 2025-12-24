@@ -12,7 +12,7 @@
     "epsilon": 12.75,
     "p": "inf",
     "p_init": 0.05,
-    "max_loss_queries": 10000
+    "max_loss_queries": 1000
   },
   "device": "/gpu:1",
   "modeln": "resnet",

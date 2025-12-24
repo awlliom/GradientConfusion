@@ -17,7 +17,7 @@
     "prior_size": 20,
     "data_size": 32,
     "prior_exploration": 0.1,
-    "max_loss_queries": 10000
+    "max_loss_queries": 1000
   },
   "device": "/gpu:1",
   "modeln": "resnet",

@@ -14,7 +14,7 @@
     "fd_eta": 2.55,
     "lr": 2.55,
     "q": 30,
-    "max_loss_queries": 10000
+    "max_loss_queries": 1000
   },
   "device": "/gpu:1",
   "modeln": "resnet",

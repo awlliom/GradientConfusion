@@ -7,12 +7,12 @@
   "_comment3": "=====ADVERSARIAL EXAMPLES CONFIGURATION=====",
   "attack_name": "SquareAttack",
   "attack_config": {
-    "batch_size": 1000,
+    "batch_size": 250,
     "name": "Square",
     "epsilon": 5,
     "p": "2",
     "p_init": 0.05,
-    "max_loss_queries": 10000
+    "max_loss_queries": 1000
   },
   "device": "/gpu:1",
   "modeln": "Resnet50",

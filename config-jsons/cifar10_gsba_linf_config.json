@@ -11,7 +11,7 @@
     "name": "GSBA",
     "epsilon": 12.75,
     "p": "inf",
-    "max_loss_queries": 10000,
+    "max_loss_queries": 1000,
     "dim_reduc_factor": 4,
     "iteration": 130,
     "top_k": 1,
