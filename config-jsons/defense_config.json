@@ -1,5 +1,5 @@
 {
-    "_comment1": "irnd, rfd, ornd, rls, aaa, none",
+    "_comment1": "irnd, rfd, ornd, rls, aaa, gc, none",
     "defense": "none",
     "irnd": {
         "sigma_noise": 0.01
@@ -31,5 +31,6 @@
         "optimizer_lr": 0.1,
         "num_iter": 100
     },
+    "gc": "",
     "none": ""
 }

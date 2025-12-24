@@ -113,9 +113,9 @@ def main() -> int:
 
     runs = []
     if args.datasets in ("all", "cifar10"):
-        runs.append(("cifar10", repo_root / "attack_cifar10.py"))
+        runs.append(("cifar10", "attack_cifar10.py", "defense_cifar10.py"))
     if args.datasets in ("all", "imagenet"):
-        runs.append(("imagenet", repo_root / "attack_imagenet.py"))
+        runs.append(("imagenet", "attack_imagenet.py", "defense_imagenet.py"))
 
     if args.attacks == "all":
         attack_patterns = None
@@ -145,13 +145,19 @@ def main() -> int:
                     return 1
                 continue
 
-            defense_config["defense"] = defense
+            defense_mode = "none" if defense == "gc" else defense
+            defense_config["defense"] = defense_mode
             defense_config_path.write_text(
                 json.dumps(defense_config, indent=4)
             )
-            print(f"Defense set to: {defense}")
+            if defense == "gc":
+                print("Defense set to: gc (defense_config=none)")
+            else:
+                print(f"Defense set to: {defense}")
 
-            for prefix, attack_script in runs:
+            for prefix, attack_script_name, defense_script_name in runs:
+                script_name = defense_script_name if defense == "gc" else attack_script_name
+                attack_script = repo_root / script_name
                 configs = find_configs(config_dir, prefix)
                 if not configs:
                     print(
