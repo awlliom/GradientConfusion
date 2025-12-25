@@ -5,6 +5,43 @@ import torch
 from scipy.optimize import minimize
 import torch.nn.functional as F
 import multiprocessing as mp
+from contextlib import contextmanager
+
+
+@contextmanager
+def _force_math_sdp():
+    if not torch.cuda.is_available():
+        yield
+        return
+    cuda_backends = getattr(torch.backends, "cuda", None)
+    if cuda_backends is None:
+        yield
+        return
+    if hasattr(cuda_backends, "sdp_kernel"):
+        with cuda_backends.sdp_kernel(enable_flash=False, enable_mem_efficient=False, enable_math=True):
+            yield
+        return
+    enable_flash = getattr(cuda_backends, "enable_flash_sdp", None)
+    enable_mem_efficient = getattr(cuda_backends, "enable_mem_efficient_sdp", None)
+    enable_math = getattr(cuda_backends, "enable_math_sdp", None)
+    flash_enabled = getattr(cuda_backends, "flash_sdp_enabled", None)
+    mem_enabled = getattr(cuda_backends, "mem_efficient_sdp_enabled", None)
+    math_enabled = getattr(cuda_backends, "math_sdp_enabled", None)
+    if all([enable_flash, enable_mem_efficient, enable_math, flash_enabled, mem_enabled, math_enabled]):
+        prev_flash = flash_enabled()
+        prev_mem = mem_enabled()
+        prev_math = math_enabled()
+        enable_flash(False)
+        enable_mem_efficient(False)
+        enable_math(True)
+        try:
+            yield
+        finally:
+            enable_flash(prev_flash)
+            enable_mem_efficient(prev_mem)
+            enable_math(prev_math)
+        return
+    yield
 
 
 def compute_batch_jv_chunked(model, batch_images, chunk_size=10):
@@ -20,7 +57,8 @@ def compute_batch_jv_chunked(model, batch_images, chunk_size=10):
         end = min(start + chunk_size, B)
         images_chunk = batch_images[start:end].clone().detach().requires_grad_(True)
 
-        logits = model(images_chunk)
+        with _force_math_sdp():
+            logits = model(images_chunk)
         probs = F.softmax(logits, dim=1)
 
         _, sorted_indices = torch.sort(probs, dim=1, descending=True)
@@ -49,9 +87,10 @@ def compute_batch_jv_chunked(model, batch_images, chunk_size=10):
         
         # Step 2: Compute A(A^T v) (JVP) - back to logit space
         # Shape: (chunk, num_classes)
-        _, AATv_chunk = torch.autograd.functional.jvp(
-            lambda x: model(x), images_chunk, ATv
-        )
+        with _force_math_sdp():
+            _, AATv_chunk = torch.autograd.functional.jvp(
+                lambda x: model(x), images_chunk, ATv
+            )
         
         
         all_AATv.append(-AATv_chunk.detach())
