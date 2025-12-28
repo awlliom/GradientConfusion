@@ -26,6 +26,20 @@ def available_models(prefix: str) -> list[str]:
     return []
 
 
+_REGEX_META = re.compile(r"[.\^$*+?{}\[\]|()\\]")
+
+
+def is_regex_pattern(pattern: str) -> bool:
+    return bool(_REGEX_META.search(pattern))
+
+
+def normalize_attack_name(name: str) -> str:
+    lowered = name.strip().lower()
+    if lowered.endswith("attack"):
+        return lowered[: -len("attack")]
+    return lowered
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Run attack scripts for all dataset configs and defense modes."
@@ -119,18 +133,23 @@ def main() -> int:
 
     if args.attacks == "all":
         attack_patterns = None
+        attack_names = None
     else:
         raw_patterns = [a.strip() for a in args.attacks.split(",") if a.strip()]
         if not raw_patterns:
             print("No attacks specified.", file=sys.stderr)
             return 1
         attack_patterns = []
+        attack_names = []
         for pattern in raw_patterns:
-            try:
-                attack_patterns.append(re.compile(pattern, re.IGNORECASE))
-            except re.error as exc:
-                print(f"Invalid attack regex '{pattern}': {exc}", file=sys.stderr)
-                return 1
+            if is_regex_pattern(pattern):
+                try:
+                    attack_patterns.append(re.compile(pattern, re.IGNORECASE))
+                except re.error as exc:
+                    print(f"Invalid attack regex '{pattern}': {exc}", file=sys.stderr)
+                    return 1
+            else:
+                attack_names.append(normalize_attack_name(pattern))
 
     try:
         any_configs = False
@@ -216,7 +235,12 @@ def main() -> int:
 
                     attack_name = config["attack_name"]
                     if attack_patterns is not None:
-                        if not any(p.search(attack_name) for p in attack_patterns):
+                        normalized_attack = normalize_attack_name(attack_name)
+                        name_match = normalized_attack in attack_names
+                        regex_match = any(
+                            p.search(attack_name) for p in attack_patterns
+                        )
+                        if not (name_match or regex_match):
                             continue
 
                     if "modeln" not in config:
