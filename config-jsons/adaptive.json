@@ -1,7 +1,10 @@
 {
     "method": "none",
     "switch_dir": {
-        "k": 5
+        "k": 10
+    },
+    "eot": { 
+        "samples": 10
     },
     "none": {
     },
